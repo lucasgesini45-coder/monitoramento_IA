@@ -1,19 +1,21 @@
-
 # ============================================================
 # DASHBOARD DE MONITORAMENTO DA IA
 # Executar no VS Code:
 #
-# python -m streamlit run dashboard.py --server.port 8501
+#  -m streamlit run dashboard.py --server.port 8501
 # ============================================================
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 from groq import Groq
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import gspread
-import google.auth
-import os
-from pyngrok import ngrok
+
+
 
 
 # ============================================================
@@ -33,47 +35,38 @@ SHEET_ID = "1OkGp2mevcG5UFsDdpuZ87_2nFXHAdbmHWQwlb7g_IAI"
 # GROQ
 # ============================================================
 
-api_key = os.environ.get("GROQ_API_KEY")
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# ============================================================
+# GROQ
+# ============================================================
+
+api_key = os.getenv("GROQ_API_KEY")
 
 if not api_key:
-    st.error(
-        "Chave da Groq não encontrada no ambiente."
-    )
-    st.info(
-        "Configure a variável GROQ_API_KEY no Windows "
-        "antes de executar o dashboard."
-    )
+    st.error("Chave da Groq não encontrada.")
     st.stop()
 
-client = Groq(
-    api_key=api_key
-)
-
+client = Groq(api_key=api_key)
 
 # ============================================================
 # GOOGLE SHEETS
 # ============================================================
 
+# GOOGLE SHEETS
+SHEET_URL = (
+    "https://docs.google.com/spreadsheets/d/"
+    "1OkGp2mevcG5UFsDdpuZ87_2nFXHAdbmHWQwlb7g_IAI"
+    "/gviz/tq?tqx=out:csv"
+)
+
 try:
-
-    creds, _ = google.auth.default()
-
-    gc = gspread.authorize(creds)
-
-    planilha = gc.open_by_key(SHEET_ID)
-
-    aba = planilha.sheet1
-
-    dados = aba.get_all_records()
-
-    df = pd.DataFrame(dados)
-
+    df = pd.read_csv(SHEET_URL)
 except Exception as erro:
-
-    st.error(
-        f"Erro ao acessar o Google Sheets: {erro}"
-    )
-
+    st.error(f"Erro ao acessar o Google Sheets: {erro}")
     st.stop()
 
 
